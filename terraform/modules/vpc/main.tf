@@ -88,6 +88,19 @@ resource "aws_vpc_endpoint" "s3" {
     "${aws_route_table.rt_1c.id}"
   ]
 }
+
+# IGW for the public subnet
+resource "aws_internet_gateway" "igw" {
+  vpc_id = "${aws_vpc.main.id}"
+}
+
+# Route the public subnet traffic through the IGW
+resource "aws_route" "internet_access" {
+  route_table_id         = aws_vpc.main.main_route_table_id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.igw.id
+}
+
 ## TODO - uncomment to establish VPN resources ##
 # resource "aws_vpn_gateway" "vpn_gateway" {
 #   vpc_id = "${aws_vpc.vpc.id}"

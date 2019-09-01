@@ -4,14 +4,15 @@ resource "aws_ecs_task_definition" "service" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
   memory                   = "512"
+  execution_role_arn  = "arn:aws:iam::069855360696:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS"
 
   container_definitions = <<DEFINITION
 [
   {
     "cpu": 256,
-    "image": "service-first",
+    "image": "069855360696.dkr.ecr.us-east-1.amazonaws.com/mhausenblas/simpleservice:latest",
     "memory": 512,
-    "name": "app",
+    "name": "service",
     "networkMode": "awsvpc",
     "portMappings": [
       {
@@ -77,7 +78,6 @@ resource "aws_iam_policy_attachment" "dev_ecs_policy_attach" {
 resource "aws_lb" "dev_ecs_alb" {
   name               = "tdev-ecs-alb"
   internal           = true
-  load_balancer_type = "application"
   security_groups    = [aws_security_group.jenkins_sg.id]
   subnets            = [var.dev_subnet_AZ1, var.dev_subnet_AZ2]
 
@@ -90,7 +90,20 @@ resource "aws_lb_target_group" "dev_ecs_service" {
   name     = "dev-ecs-lb-tg"
   port     = 80
   protocol = "HTTP"
+  target_type = "ip"
   vpc_id   = var.vpc-id
+}
+
+# Redirect all traffic from the ALB to the target group
+resource "aws_lb_listener" "front_end" {
+  load_balancer_arn = aws_lb.dev_ecs_alb.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    target_group_arn = aws_lb_target_group.dev_ecs_service.arn
+    type             = "forward"
+  }
 }
 
 resource "aws_ecs_cluster" "ecs_dev_cluster" {
@@ -102,12 +115,11 @@ resource "aws_ecs_service" "dev_ecs_service" {
   cluster         = aws_ecs_cluster.ecs_dev_cluster.id
   task_definition = aws_ecs_task_definition.service.arn
   desired_count   = 2
-  iam_role        = aws_iam_role.dev_ecs_role.arn
   launch_type     = "FARGATE"
 
-  ordered_placement_strategy {
-    type  = "binpack"
-    field = "cpu"
+  network_configuration {
+    security_groups = [aws_security_group.jenkins_sg.id]
+    subnets         = [var.dev_subnet_AZ1, var.dev_subnet_AZ2]
   }
 
   load_balancer {
@@ -116,8 +128,4 @@ resource "aws_ecs_service" "dev_ecs_service" {
     container_port   = 80
   }
 
-  placement_constraints {
-    type       = "memberOf"
-    expression = "attribute:ecs.availability-zone in [us-east-1a, us-east-1b]"
-  }
 }
