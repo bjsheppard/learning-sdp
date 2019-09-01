@@ -45,37 +45,37 @@ resource "aws_subnet" "subnet_1c" {
     "Name", format("%s%s",var.vpc,"-subnet-1c")
   ))}"
 }
-resource "aws_route_table" "rt_1a" {
+resource "aws_route_table" "primary" {
   vpc_id = "${aws_vpc.vpc.id}"
 
   tags = "${merge(var.base_tags, map(
-    "Name", format("%s%s",var.vpc,"-rt-1a")
+    "Name", format("%s%s",var.vpc,"-primary")
   ))}"
 }
-resource "aws_route_table" "rt_1b" {
-  vpc_id = "${aws_vpc.vpc.id}"
+# resource "aws_route_table" "rt_1b" {
+#   vpc_id = "${aws_vpc.vpc.id}"
 
-  tags = "${merge(var.base_tags, map(
-    "Name", format("%s%s",var.vpc,"-rt-1b")
-  ))}"
-}
-resource "aws_route_table" "rt_1c" {
-  vpc_id = "${aws_vpc.vpc.id}"
+#   tags = "${merge(var.base_tags, map(
+#     "Name", format("%s%s",var.vpc,"-rt-1b")
+#   ))}"
+# }
+# resource "aws_route_table" "rt_1c" {
+#   vpc_id = "${aws_vpc.vpc.id}"
 
-  tags = "${merge(var.base_tags, map(
-    "Name", format("%s%s",var.vpc,"-rt-1c")
-  ))}"
-}
+#   tags = "${merge(var.base_tags, map(
+#     "Name", format("%s%s",var.vpc,"-rt-1c")
+#   ))}"
+# }
 resource "aws_route_table_association" "rt_1a" {
-  route_table_id = "${aws_route_table.rt_1a.id}"
+  route_table_id = "${aws_route_table.primary.id}"
   subnet_id      = "${aws_subnet.subnet_1a.id}"
 }
 resource "aws_route_table_association" "rt_1b" {
-  route_table_id = "${aws_route_table.rt_1b.id}"
+  route_table_id = "${aws_route_table.primary.id}"
   subnet_id      = "${aws_subnet.subnet_1b.id}"
 }
 resource "aws_route_table_association" "rt_1c" {
-  route_table_id = "${aws_route_table.rt_1c.id}"
+  route_table_id = "${aws_route_table.primary.id}"
   subnet_id      = "${aws_subnet.subnet_1c.id}"
 }
 resource "aws_vpc_endpoint" "s3" {
@@ -83,22 +83,20 @@ resource "aws_vpc_endpoint" "s3" {
   service_name = "com.amazonaws.us-east-1.s3"
 
   route_table_ids = [
-    "${aws_route_table.rt_1a.id}",
-    "${aws_route_table.rt_1b.id}",
-    "${aws_route_table.rt_1c.id}"
+    "${aws_route_table.primary.id}"
   ]
 }
 
 # IGW for the public subnet
 resource "aws_internet_gateway" "igw" {
-  vpc_id = "${aws_vpc.main.id}"
+  vpc_id = "${aws_vpc.vpc.id}"
 }
 
 # Route the public subnet traffic through the IGW
 resource "aws_route" "internet_access" {
-  route_table_id         = aws_vpc.main.main_route_table_id
+  route_table_id         = "${aws_route_table.primary.id}"
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.igw.id
+  gateway_id             = "${aws_internet_gateway.igw.id}"
 }
 
 ## TODO - uncomment to establish VPN resources ##
