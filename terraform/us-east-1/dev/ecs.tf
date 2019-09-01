@@ -85,10 +85,10 @@ resource "aws_lb_listener" "front_end" {
   port              = "80"
   protocol          = "HTTP"
 
-  default_action {
+ default_action {
     target_group_arn = aws_lb_target_group.dev_ecs_service.arn
     type             = "forward"
-  }
+  } 
 }
 
 resource "aws_ecs_task_definition" "service" {
@@ -104,7 +104,7 @@ resource "aws_ecs_task_definition" "service" {
 [
   {
     "cpu": 256,
-    "image": "069855360696.dkr.ecr.us-east-1.amazonaws.com/mhausenblas/simpleservice:latest",
+    "image": "069855360696.dkr.ecr.us-east-1.amazonaws.com/nginx:latest",
     "memory": 512,
     "name": "service",
     "essential": true,
