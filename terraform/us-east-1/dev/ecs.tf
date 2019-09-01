@@ -1,29 +1,4 @@
-resource "aws_ecs_task_definition" "service" {
-  family                = "service"
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  cpu                      = "256"
-  memory                   = "512"
-  execution_role_arn  = "arn:aws:iam::069855360696:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS"
 
-  container_definitions = <<DEFINITION
-[
-  {
-    "cpu": 256,
-    "image": "069855360696.dkr.ecr.us-east-1.amazonaws.com/mhausenblas/simpleservice:latest",
-    "memory": 512,
-    "name": "service",
-    "networkMode": "awsvpc",
-    "portMappings": [
-      {
-        "containerPort": 80,
-        "hostPort": 80
-      }
-    ]
-  }
-]
-DEFINITION
-}
 
 #######################################################################################
 #                 IAM Role/Policy/Attachment/Profile                                  #
@@ -41,7 +16,11 @@ resource "aws_iam_role" "dev_ecs_role" {
     {
       "Effect": "Allow",
       "Principal": {
-        "Service": "ecs.amazonaws.com"
+        "Service": [
+          "ecs.amazonaws.com",
+          "lambda.amazonaws.com",
+          "ecs-tasks.amazonaws.com"
+        ]
       },
       "Action": "sts:AssumeRole"
     }
@@ -75,6 +54,12 @@ resource "aws_iam_policy_attachment" "dev_ecs_policy_attach" {
     policy_arn = aws_iam_policy.dev_ecs_policy.arn
 }
 
+# resource "aws_iam_policy_attachment" "aws_ecs_policy_attach" {
+#     name       = "aws-ecs-policy-attach"
+#     roles       = [aws_iam_role.dev_ecs_role.name]
+#     policy_arn = "arn:aws:iam::aws:policy/aws-service-role/AmazonECSServiceRolePolicy"
+# }
+
 resource "aws_lb" "dev_ecs_alb" {
   name               = "tdev-ecs-alb"
   internal           = true
@@ -106,20 +91,51 @@ resource "aws_lb_listener" "front_end" {
   }
 }
 
+resource "aws_ecs_task_definition" "service" {
+  family                = "service"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "256"
+  memory                   = "512"
+  task_role_arn            = aws_iam_role.dev_ecs_role.arn
+  execution_role_arn       = "arn:aws:iam::069855360696:role/ecsTaskExecutionRole"
+
+  container_definitions = <<DEFINITION
+[
+  {
+    "cpu": 256,
+    "image": "069855360696.dkr.ecr.us-east-1.amazonaws.com/mhausenblas/simpleservice:latest",
+    "memory": 512,
+    "name": "service",
+    "essential": true,
+    "networkMode": "awsvpc",
+    "portMappings": [
+      {
+        "containerPort": 80,
+        "protocol": "tcp",
+        "hostPort": 80
+      }
+    ]
+  }
+]
+DEFINITION
+}
+
 resource "aws_ecs_cluster" "ecs_dev_cluster" {
   name = "ecs-dev-cluster"
 }
 
 resource "aws_ecs_service" "dev_ecs_service" {
   name            = "dev-ecs-cluster"
-  cluster         = aws_ecs_cluster.ecs_dev_cluster.id
+  cluster         = aws_ecs_cluster.ecs_dev_cluster.arn
   task_definition = aws_ecs_task_definition.service.arn
-  desired_count   = 2
+  desired_count   = 1
   launch_type     = "FARGATE"
 
   network_configuration {
     security_groups = [aws_security_group.jenkins_sg.id]
     subnets         = [var.dev_subnet_AZ1, var.dev_subnet_AZ2]
+    assign_public_ip = true
   }
 
   load_balancer {
@@ -127,5 +143,4 @@ resource "aws_ecs_service" "dev_ecs_service" {
     container_name   = "service"
     container_port   = 80
   }
-
 }
