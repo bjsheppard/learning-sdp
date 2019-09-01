@@ -1,6 +1,6 @@
 #TODO - update to corerct VPC CIDR once we have it ##
 variable "cidr_block" {
-    default = "cidr_block"
+    default = "10.247.100.0/22"
 }
 ## TODO - uncomment and populate to establish VPN resources ##
 # variable "gateway_1_address" {
@@ -25,10 +25,7 @@ variable "cidr_block" {
 #     default = ""
 # }
 locals {
-    #TODO
-    region = "${data.terraform_remote_state.<global_state_name>.region}"
-    vpc = "${data.terraform_remote_state.<prod_state_name>.vpc}"
-    pvpc_base_tags = "${data.terraform_remote_state.<prod_state_name>.pvpc_base_tags}"
+    region = data.terraform_remote_state.global_state.outputs.region_out
+    vpc = data.terraform_remote_state.dev_state.outputs.vpc_out
+    dvpc_base_tags = data.terraform_remote_state.dev_state.outputs.dvpc_base_tags_out
 }
-
-

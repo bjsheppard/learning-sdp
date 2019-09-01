@@ -1,6 +1,5 @@
 variable "region" {
-  #TODO
-  default = "add_region_here"
+  default = "us-east-1"
 }
 
 #Used for project required tagging
@@ -8,9 +7,8 @@ variable "base_tags" {
   type = map(string)
   default = {
     managed      = "terraform"
-    #TODO
-    ProjectShort = "Project Abbreviation"
-    ProjectName  = "Project Long Name"
+    ProjectShort = "Learning ADP"
+    ProjectName  = "ADP"
   }
 }
 

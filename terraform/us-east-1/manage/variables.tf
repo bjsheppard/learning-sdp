@@ -64,13 +64,13 @@ variable "manage_AZ2" {
 
 locals {
   #TODO
-  region    = data.terraform_remote_state.<global_state_name>.outputs.region_out
+  region    = data.terraform_remote_state.<global_state>.outputs.region_out
   base_tags = merge(
     {
       "VPC"         = var.vpc
       "Environment" = var.Environment
     },
     #TODO  
-    data.terraform_remote_state.<global_state_name>.outputs.base_tags_out
+    data.terraform_remote_state.<global_state>.outputs.base_tags_out
   )
 }

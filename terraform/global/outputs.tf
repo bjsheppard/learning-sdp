@@ -9,4 +9,3 @@ output "base_tags_out" {
 output "latest_amazon_linux_2" {
   value = local.latest_amazon_linux_2
 }
-

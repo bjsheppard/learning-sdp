@@ -9,12 +9,12 @@ resource "aws_vpc" "vpc" {
   #   "Name", var.vpc
   # ))}"
 }
-### Provide a VPC DHCP Option Association ###
-resource "aws_vpc_dhcp_options_association" "dns_resolver" {
-vpc_id         = "${aws_vpc.vpc.id}"
-dhcp_options_id = "${var.custom_dhcp_options_id}"
-}
-#TODO - update region 
+# ### Provide a VPC DHCP Option Association ###
+# resource "aws_vpc_dhcp_options_association" "dns_resolver" {
+# vpc_id         = "${aws_vpc.vpc.id}"
+# dhcp_options_id = "${var.custom_dhcp_options_id}"
+# }
+
 resource "aws_subnet" "subnet_1a" {
   vpc_id                  = "${aws_vpc.vpc.id}"
   cidr_block              = "${cidrsubnet(var.cidr_block,var.subnet_size,0)}"
@@ -25,7 +25,6 @@ resource "aws_subnet" "subnet_1a" {
     "Name", format("%s%s",var.vpc,"-subnet-1a")
   ))}"
 }
-## TODO - update region 
 resource "aws_subnet" "subnet_1b" {
   vpc_id                  = "${aws_vpc.vpc.id}"
   cidr_block              = "${cidrsubnet(var.cidr_block,var.subnet_size,1)}"
@@ -36,7 +35,6 @@ resource "aws_subnet" "subnet_1b" {
     "Name", format("%s%s",var.vpc,"-subnet-1b")
   ))}"
 }
-## TODO - update region
 resource "aws_subnet" "subnet_1c" {
   vpc_id                  = "${aws_vpc.vpc.id}"
   cidr_block              = "${cidrsubnet(var.cidr_block,var.subnet_size,2)}"
@@ -80,7 +78,6 @@ resource "aws_route_table_association" "rt_1c" {
   route_table_id = "${aws_route_table.rt_1c.id}"
   subnet_id      = "${aws_subnet.subnet_1c.id}"
 }
-## TODO - update region
 resource "aws_vpc_endpoint" "s3" {
   vpc_id       = "${aws_vpc.vpc.id}"
   service_name = "com.amazonaws.us-east-1.s3"
@@ -145,59 +142,59 @@ resource "aws_vpc_endpoint" "s3" {
 #   vpn_gateway_id = "${aws_vpn_gateway.vpn_gateway.id}"
 #   route_table_id = "${aws_route_table.rt_1c.id}"
 # }
-############### ADDS IN VPC FLOW LOGS ###############
-resource "aws_flow_log" "vpc_flow_log" {
-  iam_role_arn    = "${aws_iam_role.vpc_flow_log_iam_role.arn}"
-  log_destination = "${aws_cloudwatch_log_group.vpc_flow_log_cloudwatch_log_group.arn}"
-  traffic_type    = "ALL"
-  vpc_id          = "${aws_vpc.vpc.id}"
-}
+# ############### ADDS IN VPC FLOW LOGS ###############
+# resource "aws_flow_log" "vpc_flow_log" {
+#   iam_role_arn    = "${aws_iam_role.vpc_flow_log_iam_role.arn}"
+#   log_destination = "${aws_cloudwatch_log_group.vpc_flow_log_cloudwatch_log_group.arn}"
+#   traffic_type    = "ALL"
+#   vpc_id          = "${aws_vpc.vpc.id}"
+# }
 
-resource "aws_cloudwatch_log_group" "vpc_flow_log_cloudwatch_log_group" {
-  name = "${var.vpc}-flow-logs"
-  retention_in_days = 365
-}
+# resource "aws_cloudwatch_log_group" "vpc_flow_log_cloudwatch_log_group" {
+#   name = "${var.vpc}-flow-logs"
+#   retention_in_days = 365
+# }
 
-resource "aws_iam_role" "vpc_flow_log_iam_role" {
-  name = "${var.vpc}-flow-logs-role"
+# resource "aws_iam_role" "vpc_flow_log_iam_role" {
+#   name = "${var.vpc}-flow-logs-role"
 
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "",
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "vpc-flow-logs.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-EOF
-}
+#   assume_role_policy = <<EOF
+# {
+#   "Version": "2012-10-17",
+#   "Statement": [
+#     {
+#       "Sid": "",
+#       "Effect": "Allow",
+#       "Principal": {
+#         "Service": "vpc-flow-logs.amazonaws.com"
+#       },
+#       "Action": "sts:AssumeRole"
+#     }
+#   ]
+# }
+# EOF
+# }
 
-resource "aws_iam_role_policy" "vpc_flow_log_iam_role_policy" {
-  name = "${var.vpc}-flow-logs-role-policy"
-  role = "${aws_iam_role.vpc_flow_log_iam_role.id}"
+# resource "aws_iam_role_policy" "vpc_flow_log_iam_role_policy" {
+#   name = "${var.vpc}-flow-logs-role-policy"
+#   role = "${aws_iam_role.vpc_flow_log_iam_role.id}"
 
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": [
-        "logs:CreateLogGroup",
-        "logs:CreateLogStream",
-        "logs:PutLogEvents",
-        "logs:DescribeLogGroups",
-        "logs:DescribeLogStreams"
-      ],
-      "Effect": "Allow",
-      "Resource": "*"
-    }
-  ]
-}
-EOF
-}
+#   policy = <<EOF
+# {
+#   "Version": "2012-10-17",
+#   "Statement": [
+#     {
+#       "Action": [
+#         "logs:CreateLogGroup",
+#         "logs:CreateLogStream",
+#         "logs:PutLogEvents",
+#         "logs:DescribeLogGroups",
+#         "logs:DescribeLogStreams"
+#       ],
+#       "Effect": "Allow",
+#       "Resource": "*"
+#     }
+#   ]
+# }
+# EOF
+# }

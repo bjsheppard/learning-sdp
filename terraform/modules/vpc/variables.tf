@@ -4,7 +4,7 @@ variable "base_tags" {
 }
 variable "vpc" {}
 variable "cidr_block" {}
-## TODO - needto revaluate ##
+
 variable "subnet_size" {
   default = "2"
 }
@@ -16,4 +16,4 @@ variable "subnet_size" {
 # variable "csr_1_tunnel_2_inside_cidr" {}
 # variable "csr_2_tunnel_1_inside_cidr" {}
 # variable "csr_2_tunnel_2_inside_cidr" {}
-variable "custom_dhcp_options_id" {}
+# variable "custom_dhcp_options_id" {}

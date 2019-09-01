@@ -6,30 +6,30 @@ terraform {
   backend "s3" {
     bucket         = "state_bucket_name"
     key            = "state_file_name"
-    dynamodb_table = "dynamodb_table_name"
-    region         = "add_region"
+    dynamodb_table = "tf_state"
+    region         = "us-east-1"
     encrypt        = true
   }
 }
 #TODO - update
-data terraform_remote_state "global_state_name" {
+data terraform_remote_state "global_state" {
   backend = "s3" 
   config = {
     bucket         = "state_bucket_name"
     key            = "state_file_name"
-    dynamodb_table = "dynamodb_table_name"
-    region         = "add_region"
+    dynamodb_table = "tf_state"
+    region         = "us-east-1"
     encrypt        = true
   }
 }
 ## TODO - update region
-data terraform_remote_state "dev_state_name" {
+data terraform_remote_state "prod_state_name" {
   backend = "s3" 
   config = {
     bucket         = "state_bucket_name"
     key            = "state_file_name"
-    dynamodb_table = "dynamodb_table_name"
-    region         = "add_region"
+    dynamodb_table = "tf_state"
+    region         = "us-east-1"
     encrypt        = true
   }
 }
@@ -52,20 +52,20 @@ resource "aws_vpc_dhcp_options" "custom-dhcp-options" {
     # netbios_node_type = 2
     ####################
 
-    # tags = "${merge(local.dev_base_tags, var.dhcp_options_tags)}"
+    # tags = "${merge(local.prod_base_tags, var.dhcp_options_tags)}"
 
     tags = "${merge(
             "${map(
                 "Name", "${local.vpc}-dhcp-options-set"
             )}",
-            "${local.dvpc_base_tags}"
+            "${local.pvpc_base_tags}"
   )}"
 }
 
 module "base" {
   source = "../../../modules/vpc"
 
-  base_tags = "${local.dvpc_base_tags}"
+  base_tags = "${local.pvpc_base_tags}"
   vpc = "${local.vpc}"
   cidr_block     = "${var.cidr_block}"
   ## TODO - uncomment to establish VPN resources ##

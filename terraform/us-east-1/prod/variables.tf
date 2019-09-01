@@ -6,11 +6,11 @@ provider "aws" {
 }
 
 variable "vpc" {
-  default = "dvpc"
+  default = "pvpc"
 }
 
 variable "Environment" {
-  default = "Development"
+  default = "prodelopment"
 }
 
 /********************************/
@@ -30,14 +30,14 @@ variable "vpc-cidr" {
 /************************************/
 /*Set the Subnets used by resources**/
 /************************************/
-variable "dev_subnet_AZ1" {
-  description = "Subnet to be used for DEV AZ1"
+variable "prod_subnet_AZ1" {
+  description = "Subnet to be used for prod AZ1"
   #TODO
   default     = "subnet_id"
 }
 
-variable "dev_subnet_AZ2" {
-  description = "Subnet to be used for DEV AZ2"
+variable "prod_subnet_AZ2" {
+  description = "Subnet to be used for prod AZ2"
   #TODO
   default     = "subnet_id"
 }
@@ -50,27 +50,27 @@ variable "availability_zones" {
   default = ["AZ_1_name", "AZ_2_name"]
 }
 
-variable "dev_AZ1" {
-  description = "Availability Zone for all DEV resources"
+variable "prod_AZ1" {
+  description = "Availability Zone for all prod resources"
   #TODO
   default     = "AZ_1_name"
 }
 
-variable "dev_AZ2" {
-  description = "Availability Zone for all DEV resources"
+variable "prod_AZ2" {
+  description = "Availability Zone for all prod resources"
   #TODO
   default     = "AZ_2_name"
 }
 
 locals {
   #TODO
-  region    = data.terraform_remote_state.<global_state_name>.outputs.region_out
+  region    = data.terraform_remote_state.<global_state>.outputs.region_out
   base_tags = merge(
     {
       "VPC"         = var.vpc
       "Environment" = var.Environment
     },
     #TODO  
-    data.terraform_remote_state.<global_state_name>.outputs.base_tags_out
+    data.terraform_remote_state.<global_state>.outputs.base_tags_out
   )
 }
