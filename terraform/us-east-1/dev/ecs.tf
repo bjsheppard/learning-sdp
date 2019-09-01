@@ -62,7 +62,7 @@ resource "aws_iam_policy_attachment" "dev_ecs_policy_attach" {
 
 resource "aws_lb" "dev_ecs_alb" {
   name               = "tdev-ecs-alb"
-  internal           = true
+  internal           = false
   security_groups    = [aws_security_group.jenkins_sg.id]
   subnets            = [var.dev_subnet_AZ1, var.dev_subnet_AZ2]
 
