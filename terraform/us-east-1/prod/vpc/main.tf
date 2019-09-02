@@ -4,7 +4,7 @@ provider "aws" {
 #TODO - update
 terraform {
   backend "s3" {
-    bucket         = "state_bucket_name"
+    bucket         = "sdp-state-files"
     key            = "state_file_name"
     dynamodb_table = "tf_state"
     region         = "us-east-1"
@@ -15,7 +15,7 @@ terraform {
 data terraform_remote_state "global_state" {
   backend = "s3" 
   config = {
-    bucket         = "state_bucket_name"
+    bucket         = "sdp-state-files"
     key            = "state_file_name"
     dynamodb_table = "tf_state"
     region         = "us-east-1"
@@ -26,7 +26,7 @@ data terraform_remote_state "global_state" {
 data terraform_remote_state "prod_state_name" {
   backend = "s3" 
   config = {
-    bucket         = "state_bucket_name"
+    bucket         = "sdp-state-files"
     key            = "state_file_name"
     dynamodb_table = "tf_state"
     region         = "us-east-1"

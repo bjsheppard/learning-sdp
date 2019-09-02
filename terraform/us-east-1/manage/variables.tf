@@ -10,7 +10,7 @@ variable "vpc" {
 }
 
 variable "Environment" {
-  default = "manageelopment"
+  default = "manage"
 }
 
 /********************************/
@@ -19,12 +19,12 @@ variable "Environment" {
 variable "vpc-id" {
   description = "ID of the VPC"
   #TODO
-  default     = "vpc_id"
+  default     = "vpc-0fd86d95ada70ca39"
 }
 
 #TODO
 variable "vpc-cidr" {
-  default = "vpc_cidr"
+  default = "10.248.100.0/22"
 }
 
 /************************************/
@@ -33,13 +33,13 @@ variable "vpc-cidr" {
 variable "manage_subnet_AZ1" {
   description = "Subnet to be used for manage AZ1"
   #TODO
-  default     = "subnet_id"
+  default     = "subnet-0e3a8804650b53a39"
 }
 
 variable "manage_subnet_AZ2" {
   description = "Subnet to be used for manage AZ2"
   #TODO
-  default     = "subnet_id"
+  default     = "subnet-0c60e6bbddaa237ee"
 }
 
 /********************************************/
@@ -47,30 +47,30 @@ variable "manage_subnet_AZ2" {
 /********************************************/
 variable "availability_zones" {
   #TODO
-  default = ["AZ_1_name", "AZ_2_name"]
+  default = ["us-east-1a", "us-east-1b"]
 }
 
 variable "manage_AZ1" {
   description = "Availability Zone for all manage resources"
   #TODO
-  default     = "AZ_1_name"
+  default     = "us-east-1a"
 }
 
 variable "manage_AZ2" {
   description = "Availability Zone for all manage resources"
   #TODO
-  default     = "AZ_2_name"
+  default     = "us-east-1b"
 }
 
 locals {
   #TODO
-  region    = data.terraform_remote_state.<global_state>.outputs.region_out
+  region    = data.terraform_remote_state.global_state.outputs.region_out
   base_tags = merge(
     {
       "VPC"         = var.vpc
       "Environment" = var.Environment
     },
     #TODO  
-    data.terraform_remote_state.<global_state>.outputs.base_tags_out
+    data.terraform_remote_state.global_state.outputs.base_tags_out
   )
 }

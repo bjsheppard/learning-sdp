@@ -47,6 +47,6 @@ output "jenkins_sg_out" {
   value = aws_security_group.jenkins_sg.id
 }
 
-output "dns_sg_out" {
-  value = aws_security_group.dns_sg.id
-}
+# output "dns_sg_out" {
+#   value = aws_security_group.dns_sg.id
+# }
